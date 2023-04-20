@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
@@ -10,24 +9,19 @@ import (
 )
 
 func TestEvent_MarshalJSON(t *testing.T) {
-	// request_time := time.Date(2021, 1, 26, 1, 1, 1, 0, time.Local).Unix()
-	request_time := time.Now()
-	// request_time_string := strconv.FormatInt(request_time, 10)
-	request_time_string :=  fmt.Sprintf("%d", request_time.Unix())
 	event := &Event{
 		Action:      "Test",
 		RequestedBy: 123,
-		RequestedTS: request_time,
+		RequestedTS: time.Date(2021, 1, 26, 1, 1, 1, 0, time.Local),
 	}
-	json_data := fmt.Sprintf("{\"requested_at\":%s,\"action\":\"Test\",\"requested_by\":123}", request_time_string)
 	data, err := json.Marshal(event)
 	if err != nil {
 		t.Errorf("Error while marshalling: %v", err)
 		return
 	}
-	if string(data) != json_data {
+	if string(data) != "{\"requested_at\":1611615661,\"action\":\"Test\",\"requested_by\":123}" {
 		t.Errorf("Error while marshalling: RequestedBy expected[%s], got[%s]",
-			json_data,
+			"{\"requested_at\":1611615661,\"action\":\"Test\",\"requested_by\":123}",
 			string(data))
 	}
 }
@@ -94,7 +88,7 @@ func TestSecretModel_Merge(t *testing.T) {
 	}
 	// =============================
 	sm = &SecretModel{
-		Database: &MyDB{},
+		Database: &DBConfig{},
 	}
 	ism = aws.String(`{
     "db": {
@@ -111,8 +105,8 @@ func TestSecretModel_Merge(t *testing.T) {
 	}
 	// =============================
 	sm = &SecretModel{
-		Database: &MyDB{
-			Config: &DBConfig{},
+		Database: &DBConfig{
+			Africainv: &MssqlConfig{},
 		},
 	}
 	ism = aws.String(`{
@@ -130,10 +124,8 @@ func TestSecretModel_Merge(t *testing.T) {
 	}
 	// =============================
 	sm = &SecretModel{
-		Database: &MyDB{
-			Config: &DBConfig{
-				Dialect: "mmm",
-			},
+		Database: &DBConfig{
+			Africainv: &MssqlConfig{},
 		},
 	}
 	ism = aws.String(`{
@@ -147,10 +139,6 @@ func TestSecretModel_Merge(t *testing.T) {
 	sm = sm.Merge(ism)
 	if sm == nil {
 		t.Errorf("Error was expecting a not nil")
-		return
-	}
-	if sm.Database.Config.Dialect != "mmm" {
-		t.Errorf("Error was expecting sm.Database.Config.Dialect == \"mmm\"")
 		return
 	}
 }

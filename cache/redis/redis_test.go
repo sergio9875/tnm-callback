@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"context"
+	"log"
 	"malawi-callback/models"
 	"malawi-callback/utils"
-	"log"
 	"os"
 	"strconv"
 	"strings"

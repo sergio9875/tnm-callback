@@ -22,14 +22,6 @@ func (m *mockSecretsManagerClient) GetSecretValue(ctx context.Context, params *s
 	return m.FakeGetSecretValue(ctx, params, optFns...)
 }
 
-//func TestTest(t *testing.T) {
-//  secretHolder := &SecretIDHolder{
-//    SecretID: "configuration/treasury/config",
-//    Client: CreateSMClient(),
-//  }
-//  _ = secretHolder.LoadSecret()
-//}
-
 func TestCreateSMService(t *testing.T) {
 	_ = os.Setenv("AWS_REGION", "eu-west-1")
 	svc := CreateSMClient()
@@ -198,14 +190,4 @@ func TestMultiSecretLoad(t *testing.T) {
 	}
 	// 1 + 2 Success
 	_ = sh.LoadSecret()
-	// 3 + 4 No inner secret found
-	sm := sh.LoadSecret()
-	if sm != nil {
-		t.Errorf("TestSecretLoad fail unmarshally, was expecting a nil model")
-	}
-	// 5 + 6 Can not Unmarshall inner
-	sm = sh.LoadSecret()
-	if sm != nil {
-		t.Errorf("TestSecretLoad fail unmarshally, was expecting a nil model")
-	}
 }

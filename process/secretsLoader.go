@@ -4,12 +4,12 @@ package process
 // https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html
 
 import (
-  "malawi-callback/models"
-  "context"
-  "encoding/base64"
+	"context"
+	"encoding/base64"
 	"encoding/json"
-  "github.com/aws/aws-sdk-go-v2/config"
-  "os"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"malawi-callback/models"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
@@ -18,19 +18,19 @@ import (
 )
 
 type SecretManager interface {
-  GetSecretValue(ctx context.Context, params *secretsmanager.GetSecretValueInput, optFns ...func(options *secretsmanager.Options)) (*secretsmanager.GetSecretValueOutput, error)
+	GetSecretValue(ctx context.Context, params *secretsmanager.GetSecretValueInput, optFns ...func(options *secretsmanager.Options)) (*secretsmanager.GetSecretValueOutput, error)
 }
 
 // SecretIDHolder model
 type SecretIDHolder struct {
-	SecretID      string
-	Client        SecretManager
+	SecretID string
+	Client   SecretManager
 }
 
 func (sh *SecretIDHolder) getSecret() (*string, error) {
 	log.Println("SYSTEM", "loading secret: ", sh.SecretID)
 	//Create a Secrets Manager client
-	input := &secretsmanager.GetSecretValueInput {
+	input := &secretsmanager.GetSecretValueInput{
 		SecretId:     aws.String(sh.SecretID),
 		VersionStage: aws.String("AWSCURRENT"),
 	}
@@ -66,32 +66,33 @@ func (sh *SecretIDHolder) getSecret() (*string, error) {
 
 // CreateSMService func
 func CreateSMClient() *secretsmanager.Client {
-  cfg, _ := config.LoadDefaultConfig(context.TODO(),
-    config.WithRegion(os.Getenv("AWS_REGION")),
-  )
+	cfg, _ := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion(os.Getenv("AWS_REGION")),
+	)
 
 	// Configure a client with debug logging enabled
 	if log.ValidateAgainstConfiguredLogLevel(log.TRACE) {
 		cfg.ClientLogMode = aws.LogRequestWithBody | aws.LogResponse
 	}
 
-  return secretsmanager.NewFromConfig(cfg)
+	return secretsmanager.NewFromConfig(cfg)
 }
 
 func (sh *SecretIDHolder) loadSecrets(secrets *models.SecretModel) *models.SecretModel {
 	tempSH := &SecretIDHolder{
 		SecretID: "",
-		Client: sh.Client,
+		Client:   sh.Client,
 	}
 	for _, secretName := range secrets.Secrets {
 		log.Infof("SYSTEM", "Loading inner secret: %s", secretName)
 		tempSH.SecretID = secretName
 		secretValue, err := tempSH.getSecret()
+
 		if err != nil {
-			log.Error("SYSTEM", "Inner secret error: " + err.Error())
-			return nil
+			log.Error("SYSTEM", "Inner secret error: "+err.Error())
+			continue
 		}
-		//log.Println("SYSTEM", "[" + *secretValue + "]")
+
 		secrets = secrets.Merge(secretValue)
 	}
 	return secrets

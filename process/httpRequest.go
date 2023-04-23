@@ -18,6 +18,7 @@ func (c *Controller) mapPaymentGatewayRequest(msgBody *models.IncomingRequest, s
 
 	paymentDetails := models.PaymentDetails{
 		Code:              statusCode,
+		StatusCode:        msgBody.ResultCode,
 		Explanation:       msgBody.ResultDesc,
 		Paymentreference:  mbtPerId.Mbt,
 		Sequenceid:        msgBody.TransactionId,

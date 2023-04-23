@@ -9,6 +9,7 @@ type PaymentGatewayRequest struct {
 
 type PaymentDetails struct {
 	Code              int           `json:"code"`
+	StatusCode        string        `json:"statuscode"`
 	Explanation       string        `json:"explanation"`
 	Paymentreference  string        `json:"paymentreference"`
 	Sequenceid        string        `json:"sequenceid"`

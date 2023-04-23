@@ -35,7 +35,7 @@ func TestLambdaHandler(t *testing.T) {
 	"conversation_id": "AG_20200714_00006368d1caf5faf759",
 	"result_code": "200",
 	"result_desc": "Process service request successfully.",
-	"transaction_id": "1348440",
+	"transaction_id": "1348441",
 	"external_ref":"F509897",
 	"response_time": "2020-07-14 13:12:55"
 	}`},

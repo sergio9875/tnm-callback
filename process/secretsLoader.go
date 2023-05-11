@@ -69,12 +69,6 @@ func CreateSMClient() *secretsmanager.Client {
 	cfg, _ := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(os.Getenv("AWS_REGION")),
 	)
-
-	// Configure a client with debug logging enabled
-	if log.ValidateAgainstConfiguredLogLevel(log.TRACE) {
-		cfg.ClientLogMode = aws.LogRequestWithBody | aws.LogResponse
-	}
-
 	return secretsmanager.NewFromConfig(cfg)
 }
 
@@ -87,12 +81,11 @@ func (sh *SecretIDHolder) loadSecrets(secrets *models.SecretModel) *models.Secre
 		log.Infof("SYSTEM", "Loading inner secret: %s", secretName)
 		tempSH.SecretID = secretName
 		secretValue, err := tempSH.getSecret()
-
 		if err != nil {
 			log.Error("SYSTEM", "Inner secret error: "+err.Error())
-			continue
+			return nil
 		}
-
+		//log.Println("SYSTEM", "[" + *secretValue + "]")
 		secrets = secrets.Merge(secretValue)
 	}
 	return secrets

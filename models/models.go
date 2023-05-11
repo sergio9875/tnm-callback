@@ -14,57 +14,6 @@ type IncomingRequest struct {
 	ExternalRef    string `json:"external_ref,omitempty"`
 	ResponseTime   string `json:"response_time,omitempty"`
 }
-type USSDRedirectParams struct {
-	//PaymentMethod string `json:"paymentmethod"`
-	TransId string `json:"transId"`
-	//TransUnq string `json:"transunq"`
-	//PaymentType   string `json:"paymenttype"`
-	//TransTransstId string `json:"transtransstid"`
-	//TransIp            string `json:"transip"`
-	FinalPaymentAmount string `json:"finalpaymentamount"`
-	//Currency           string `json:"currency"`
-	Explanation string `json:"explanation"`
-
-	MerchantId      string `json:"merchantId"`
-	TerminalId      string `json:"terminalId"`
-	SubMerchantName string `json:"SubMerchantName"`
-	TransactionId   string `json:"TransactionId"`
-	TraceId         string `json:"TraceId"`
-	CustomerId      string `json:"CustomerId"`
-	Reference       string `json:"Reference"`
-	Amount          string `json:"Amount"`
-	BankCode        string `json:"BankCode"`
-	BankName        string `json:"BankName"`
-	CustomerMobile  string `json:"CustomerMobile"`
-	ResponseCode    string `json:"ResponseCode"`
-	ResponseMessage string `json:"ResponseMessage"`
-	TimeStamp       int    `json:"TimeStamp"`
-	Signature       string `json:"Signature"`
-}
-
-type TransactionStatusParsedResponse struct {
-	ResponseCode    string `json:"ResponseCode"`
-	ResponseMessage string `json:"ResponseMessage"`
-	Reference       string `json:"Reference"`
-	Amount          int    `json:"Amount"`
-	TerminalId      string `json:"TerminalId"`
-	MerchantId      string `json:"MerchantId"`
-	BankCode        string `json:"BankCode"`
-	BankName        string `json:"BankName"`
-	CustomerMobile  string `json:"CustomerMobile"`
-	SubMerchantName string `json:"SubMerchantName"`
-	TransactionId   string `json:"TransactionId"`
-	TraceId         string `json:"TraceId"`
-	CustomerId      string `json:"CustomerId"`
-	Signature       string `json:"Signature"`
-	TimeStamp       int    `json:"TimeStamp"`
-}
-
-// Cleaner model
-type Cleaner struct {
-	PurgePeriod int `json:"purge_period"`
-	MaxAge      int `json:"max_age"`
-}
 
 // SqsDestination model
 type SqsDestination struct {

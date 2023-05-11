@@ -13,6 +13,7 @@ import (
 	repo "malawi-callback/repository"
 	"malawi-callback/request"
 	"malawi-callback/utils"
+	"strings"
 )
 
 // Controller container
@@ -53,6 +54,7 @@ func (c *Controller) PostProcess() {
 }
 
 func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxyRequest) error {
+
 	c.sendSumoMessages(ctx, "start tnm-malawi get callback process", request)
 
 	var err error
@@ -63,9 +65,11 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 		c.sendSumoMessages(ctx, err.Error(), nil)
 		return err
 	}
+	url := c.config.DpoPygwUrl
 
-	//pgwUrl := c.config.DpoPygwUrl
-	pgwUrl := "http://sergeyk-3g.dev.directpay.online/PaymentGateway/paymentGateway.php"
+	// Using the Replace Function
+	pgwUrl := strings.Replace(url, "yaronda", "sergeyk", -1)
+
 	headers := make(map[string]string, 0)
 
 	var statusCode int

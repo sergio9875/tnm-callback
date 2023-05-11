@@ -1,18 +1,11 @@
 package process
 
 import (
-	"fmt"
 	"malawi-callback/models"
 	"time"
 )
 
 func (c *Controller) mapPaymentGatewayRequest(msgBody *models.IncomingRequest, statusCode int) *models.PaymentGatewayRequest {
-
-	mbtPerId, err := c.getMbtPerId(msgBody.TransactionId)
-
-	if err != nil {
-		fmt.Println("Error with mbtPerId")
-	}
 
 	tm := time.Now().Format("02-Jan-2006 15:04:05")
 
@@ -20,17 +13,17 @@ func (c *Controller) mapPaymentGatewayRequest(msgBody *models.IncomingRequest, s
 		Code:              statusCode,
 		StatusCode:        msgBody.ResultCode,
 		Explanation:       msgBody.ResultDesc,
-		Paymentreference:  mbtPerId.Mbt,
-		Sequenceid:        msgBody.TransactionId,
+		Paymentreference:  msgBody.TransactionId,
+		Sequenceid:        msgBody.ExternalRef,
 		Terminalmno:       "TnmMalawiPayment",
 		Terminalsettings:  nil,
 		Amount:            "",
 		Currency:          "",
 		Msisdn:            "",
-		Approvalreference: msgBody.ConversationId,
+		Approvalreference: msgBody.TransactionId,
 		Timestamp:         tm,
 		Customerdetails:   nil,
-		Mbtid:             msgBody.TransactionId,
+		Mbtid:             msgBody.ExternalRef,
 	}
 	return &models.PaymentGatewayRequest{
 		Paymentmethod:  "mobile",

@@ -30,7 +30,7 @@ type PaymentGatewayResponse struct {
 	RedirectURL  string `json:"redirectURL"`
 	Instructions string `json:"instructions"`
 	Details      struct {
-		ResultCode int `json:"ResultCode"`
-		StatusCode int `json:"StatusCode"`
+		ResultCode int    `json:"ResultCode"`
+		StatusCode string `json:"StatusCode"`
 	} `json:"details"`
 }

@@ -1,0 +1,81 @@
+service: malawi-callback
+frameworkVersion: ^3.3.0
+
+custom:
+  functionName: ${self:service}
+  mainSecretName: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):environment_variables.secret_name}
+
+provider:
+  name: aws
+  region: eu-west-1
+  stackName: ${self:custom.functionName}
+  lambdaHashingVersion: "20201221"
+  deploymentBucket:
+    name: com.serverless.${self:provider.region}.${aws:accountId, '427246389222'}.dpo.deploys
+    blockPublicAccess: true
+  deploymentPrefix: devops/lambdas
+  iam:
+    role:
+      managedPolicies:
+        - { 'Fn::Join': [':', ['arn:aws:iam:', { Ref: 'AWS::AccountId' }, 'policy/sumo-pusher']] }
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "secretsmanager:GetSecretValue"
+          Resource:
+            - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.main}
+            - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.db_africainv}
+            - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.dpo_services}
+
+apiGateway:
+  restApiId: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):apigateway.restApiId}
+  restApiRootResourceId: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):apigateway.restApiRootResourceId}
+  description: Allow Tnm Malawi to send us callback calls
+
+package:
+  patterns:
+    - "!.serverless"
+    - "!.idea"
+    - "!logger"
+    - "!models"
+    - "!process"
+    - "!repository"
+    - "!utils"
+    - "!README.md"
+    - "!sonar-project.properties"
+    - "!ascii.txt"
+    - "!go.*"
+    - "!*.go"
+    - "!appspec.yml"
+    - "!.gitignore"
+    - "!docker-compose.yml"
+    - "!Dockerfile"
+    - ${self:custom.functionName}
+
+functions:
+  MainFunction:
+    handler: ${self:custom.functionName}
+    name: ${self:custom.functionName}
+    description: Tnm Malawi callback Lambda
+    runtime: go1.x
+    architecture: x86_64
+    memorySize: 128
+    timeout: 15
+    environment:
+      LOG_LEVEL: DEBUG
+      SECRET_NAME: ${self:custom.mainSecretName}
+    vpc: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):vpc}
+    events:
+      - http:
+          method: any
+          path: malawi/callback/{proxy+}
+          # authorizer:
+          #   name: mmcs-safaricom-authorizer
+          #   arn:
+          #     'Fn::ImportValue': 'mmcs-safaricom-authorizer:lambda-function-arn'
+          #   type: request
+          #   resultTtlInSeconds: 0
+          #   managedExternally: false
+
+resources:
+  Description: Built via Pipeline ID ${env:CI_PIPELINE_IID} on ${env:CI_COMMIT_BRANCH} for commit ${env:CI_COMMIT_SHORT_SHA} by ${env:CI_COMMIT_AUTHOR}

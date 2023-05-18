@@ -104,7 +104,7 @@ func (c *Controller) sendSumoMessages(ctx context.Context, message string, param
 	}
 
 	sumo := &models.SumoPusherMessage{
-		Category: "tnm",
+		Category: "malawi",
 		SumoPayload: models.SumoPayload{
 			Stack:   *c.requestId,
 			Message: "[tnm-malawi-callback-status-check] " + message,

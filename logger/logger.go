@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"malawi-callback/utils"
+	"tnm-malawi/connectors/callback/utils"
 
 	"encoding/json"
 	"fmt"

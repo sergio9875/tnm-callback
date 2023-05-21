@@ -3,8 +3,8 @@ package mssql
 import (
 	"database/sql"
 	"fmt"
-	"malawi-callback/models"
-	repo "malawi-callback/repository"
+	"tnm-malawi/connectors/callback/models"
+	repo "tnm-malawi/connectors/callback/repository"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )

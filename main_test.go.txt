@@ -2,58 +2,39 @@ package main
 
 import (
 	"context"
-	"github.com/aws/aws-lambda-go/events"
 	"os"
+	log "tnm-malawi/connectors/callback/logger"
 	"testing"
+
+	"github.com/aws/aws-lambda-go/events"
 )
 
 func TestLambdaHandler(t *testing.T) {
-	err := os.Setenv("AWS_REGION", "eu-west-1")
-	if err != nil {
-		return
-	}
-	err = os.Setenv("SECRET_NAME", "configuration/dpo/callback/config")
-	if err != nil {
-		return
-	}
-
-	type args struct {
-		ctx        context.Context
-		apiGateway events.APIGatewayProxyRequest
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    bool
-		wantErr bool
-	}{
-		{
-			name: "Integration Test",
-			args: args{
-				ctx: context.TODO(),
-				apiGateway: events.APIGatewayProxyRequest{Body: `{
-	"conversation_id": "AG_20200714_00006368d1caf5faf759",
-	"result_code": "200",
-	"result_desc": "Process service request successfully.",
-	"transaction_id": "R3T5T9G9",
-	"external_ref":"1348800",
-	"response_time": "2023-05-17 18:12:55"
-	}`},
-			},
-			want:    true,
-			wantErr: false,
+	os.Setenv("AWS_REGION", "eu-west-1")
+	os.Setenv("SECRET_NAME", "configuration/dpo/callback/config")
+	queryStringParameters := map[string]string{}
+	req := events.APIGatewayProxyRequest{
+		Path:       "https://cb.directpay.online/tnm/mw/callback/request",
+		HTTPMethod: "POST",
+		Headers: map[string]string{
+			"Content-Type": "application/json",
 		},
+		IsBase64Encoded:       false,
+		QueryStringParameters: queryStringParameters,
+		RequestContext:        events.APIGatewayProxyRequestContext{RequestID: "1"},
+		Body: `{
+            "conversation_id": "AG_20200714_00006368d1caf5faf759",
+            "result_code": "200",
+            "result_desc": "Process service request successfully.",
+            "transaction_id": "R3T5T9G9",
+            "external_ref":"1348800",
+            "response_time": "2023-05-17 18:12:55"
+        }`,
 	}
-	for _, tt := range tests {
-		if os.Getenv("SKIP_MAIN") == "" {
-			t.Run(tt.name, func(t *testing.T) {
-				_, _ = LambdaHandler(tt.args.ctx, tt.args.apiGateway)
-				var err error
-				if (err != nil) != tt.wantErr {
-					t.Errorf("LambdaHandler() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
-			})
-		}
+	err := LambdaHandler(context.TODO(), req)
+	if err != nil {
+		log.Error("ROOT", "Error response", err)
+	} else {
+		log.Info("running")
 	}
 }

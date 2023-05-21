@@ -2,7 +2,7 @@ package process
 
 import (
 	"encoding/json"
-	log "malawi-callback/logger"
+	log "tnm-malawi/connectors/callback/logger"
 )
 
 func (c *Controller) handleGetMessage(message string, messageData interface{}) error {

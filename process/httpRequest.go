@@ -1,8 +1,8 @@
 package process
 
 import (
-	"malawi-callback/models"
 	"time"
+	"tnm-malawi/connectors/callback/models"
 )
 
 func (c *Controller) mapPaymentGatewayRequest(msgBody *models.IncomingRequest, statusCode int) *models.PaymentGatewayRequest {

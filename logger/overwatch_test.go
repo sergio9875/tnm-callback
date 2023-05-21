@@ -2,11 +2,11 @@ package logger
 
 import (
 	"bou.ke/monkey"
-	"malawi-callback/utils"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+	"tnm-malawi/connectors/callback/utils"
 )
 
 func Test_findIndex(t *testing.T) {

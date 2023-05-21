@@ -6,8 +6,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 
-	log "malawi-callback/logger"
 	"os"
+	log "tnm-malawi/connectors/callback/logger"
 )
 
 // SqsApi defines the interface for the GetQueueUrl and SendMessage functions.

@@ -2,15 +2,21 @@ package utils
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"reflect"
+	"regexp"
+	"runtime"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -20,8 +26,38 @@ const (
 	ContentTypeApplicationJSON = "application/json"
 	// ContentTypeApplicationXML const
 	ContentTypeApplicationXML = "application/xml"
-	ContentType               = "Content-Type"
+	// ContentTypeTextPlain const
+	ContentTypeTextPlain = "text/plain"
+	// ContentTypeHeader const
+	ContentTypeHeader = "Content-Type"
+	// AuthorizationHeader const
+	AuthorizationHeader = "Authorization"
+	// BearerToken const
+	BearerToken = "Bearer "
+	// OK const
+	OK = "Ok"
 )
+
+// HTTPStatusCode is a type for resolving the returned HTTP Status Code Content
+type HTTPStatusCode int
+
+// HTTPStatusCodes is a map of possible HTTP Status Code and Messages
+var HTTPStatusCodes = map[HTTPStatusCode]string{
+	200: "The API request is successful.",
+	201: "Request fulfilled for single record insertion.",
+	202: "Request fulfilled for multiple records insertion.",
+	204: "There is no content available for the request.",
+	304: "The requested page has not been modified. In case \"If-Modified-Since\" header is used for GET APIs",
+	400: "The request or the authentication considered is invalid.",
+	401: "Invalid API key provided.",
+	403: "No permission to do the operation.",
+	404: "Invalid request.",
+	405: "The specified method is not allowed.",
+	413: "The server did not accept the request while uploading a file, since the limited file size has exceeded.",
+	415: "The server did not accept the request while uploading a file, since the media/ file type is not supported.",
+	429: "Number of API requests per minute/day has exceeded the limit.",
+	500: "Generic error that is encountered due to an unexpected server error.",
+}
 
 type GenericResponse struct {
 	XMLName           *xml.Name `xml:"API3G" json:",omitempty"`
@@ -29,14 +65,21 @@ type GenericResponse struct {
 	ResultExplanation string    `xml:"ResultExplanation"`
 }
 
+func ResolveStatus(r *http.Response) string {
+	if v, ok := HTTPStatusCodes[HTTPStatusCode(r.StatusCode)]; ok {
+		return v
+	}
+	return ""
+}
+
 // GetRequestBody return array of byte from the request
 func GetRequestBody(request *http.Request) ([]byte, error) {
 	if request.ContentLength == 0 {
 		return nil, errors.New("no body found in request")
 	}
-	rs, _ := ioutil.ReadAll(request.Body)
+	rs, _ := io.ReadAll(request.Body)
 	_ = request.Body.Close()
-	request.Body = ioutil.NopCloser(bytes.NewBuffer(rs))
+	request.Body = io.NopCloser(bytes.NewBuffer(rs))
 
 	return rs, nil
 }
@@ -57,13 +100,13 @@ func ErrorToText(err GenericResponse) string {
 
 // ResponseWriterTextHtml function
 func ResponseWriterTextHtml(writer http.ResponseWriter, response interface{}) {
-	writer.Header().Set(ContentType, ContentTypeApplicationXML)
+	writer.Header().Set(ContentTypeHeader, ContentTypeApplicationXML)
 	writer.Write([]byte(fmt.Sprint(response)))
 }
 
 // ResponseWriterXML function
 func ResponseWriterXML(writer http.ResponseWriter, response interface{}) {
-	writer.Header().Set(ContentType, ContentTypeApplicationXML)
+	writer.Header().Set(ContentTypeHeader, ContentTypeApplicationXML)
 	xmlHeader := "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 	_, _ = writer.Write([]byte(xmlHeader))
 	_ = xml.NewEncoder(writer).Encode(response)
@@ -71,10 +114,14 @@ func ResponseWriterXML(writer http.ResponseWriter, response interface{}) {
 
 // ResponseWriterJSON function
 func ResponseWriterJSON(writer http.ResponseWriter, response interface{}) {
-	writer.Header().Set(ContentType, ContentTypeApplicationJSON)
-	//js, _ := json.Marshal(response)
-	//writer.Write(js)
+	writer.Header().Set(ContentTypeHeader, ContentTypeApplicationJSON)
 	_ = json.NewEncoder(writer).Encode(response)
+}
+
+// ResponseWriterText function
+func ResponseWriterText(writer http.ResponseWriter, response interface{}) {
+	writer.Header().Set(ContentTypeHeader, ContentTypeTextPlain)
+	writer.Write([]byte(fmt.Sprintf("%s", response)))
 }
 
 // check if string slice contains a value
@@ -166,8 +213,30 @@ func JsonIt(a interface{}) string {
 		reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
 		return fmt.Sprintf("%v", a)
 	}
-	data, _ := json.Marshal(a)
-	return string(data)
+	var buf bytes.Buffer
+	e := json.NewEncoder(&buf)
+	e.SetEscapeHTML(false)
+	e.Encode(a)
+	res, _ := JsonMinify(buf.Bytes())
+	return strings.TrimSuffix(string(res), "\n")
+}
+
+func JsonMinify(jsonB []byte) ([]byte, error) {
+
+	var buff = new(bytes.Buffer)
+	errCompact := json.Compact(buff, jsonB)
+	if errCompact != nil {
+		newErr := fmt.Errorf("failure encountered compacting json := %w", errCompact)
+		return jsonB, newErr
+	}
+
+	b, err := ioutil.ReadAll(buff)
+	if err != nil {
+		readErr := fmt.Errorf("read buffer error encountered := %w", err)
+		return jsonB, readErr
+	}
+
+	return b, nil
 }
 
 func IsNativeKind(v reflect.Kind) bool {
@@ -187,8 +256,24 @@ func Getenv(key, fallback string) string {
 	return fallback
 }
 
-func SafeAtoi(str string, fallback int) int {
+func SafeAtoi64(str string, fallback *int64) *int64 {
+	value, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return fallback
+	}
+	return &value
+}
+
+func SafeAtoi(str string, fallback *int) *int {
 	value, err := strconv.Atoi(str)
+	if err != nil {
+		return fallback
+	}
+	return &value
+}
+
+func SafeAtof(str string, fallback float64) float64 {
+	value, err := strconv.ParseFloat(str, 64)
 	if err != nil {
 		return fallback
 	}
@@ -197,4 +282,93 @@ func SafeAtoi(str string, fallback int) int {
 
 func StringPtr(str string) *string {
 	return &str
+}
+
+func IntPtr(i int) *int {
+	return &i
+}
+
+func Int64Ptr(i int64) *int64 {
+	return &i
+}
+
+func IsValidGUID(guid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
+	return r.MatchString(guid)
+}
+
+func getHeader(headerName string, r *http.Request) (string, error) {
+	value := r.Header.Get(headerName)
+	if len(value) == 0 {
+		return "", fmt.Errorf("no %s header present", headerName)
+	}
+	return value, nil
+}
+
+func GetHeaderWithPrefixAndDecode(headerName string, prefix string, r *http.Request) (string, error) {
+	value, err := getHeader(headerName, r)
+	if err != nil {
+		return "", err
+	}
+	trimmed := strings.TrimPrefix(value, prefix)
+	bValue, err := base64.StdEncoding.DecodeString(trimmed)
+	if err != nil {
+		return "", err
+	}
+	return string(bValue), nil
+}
+
+func CreateKeyValuePairs(m map[string]string) string {
+	if len(m) == 0 {
+		return ""
+	}
+	b := new(bytes.Buffer)
+	for key, value := range m {
+		fmt.Fprintf(b, "%s=%s&", url.QueryEscape(key), url.QueryEscape(value))
+	}
+	return b.String()[:b.Len()-1]
+}
+
+func CreateSQSUrlFromArn(arn string) string {
+	splits := strings.Split(arn, ":")
+	return fmt.Sprintf("https://%s.%s.amazonaws.com/%s/%s", splits[2], splits[3], splits[4], splits[5])
+}
+
+func TrimLeftChars(s string, n int) string {
+	m := 0
+	for i := range s {
+		if m >= n {
+			return s[i:]
+		}
+		m++
+	}
+	return s[:0]
+}
+
+func XmlIt(a interface{}) string {
+	dataType := IndirectType(reflect.TypeOf(a))
+	switch dataType.Kind() {
+	case reflect.String, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Bool,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+		reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
+		return fmt.Sprintf("%v", a)
+	}
+	var buf bytes.Buffer
+	e := xml.NewEncoder(&buf)
+	e.Encode(a)
+	return strings.TrimSuffix(buf.String(), "\n")
+}
+
+func Src(callerDepth int) string {
+	// Determine caller func
+	pc, file, lineno, ok := runtime.Caller(callerDepth)
+	src := ""
+	if ok {
+		slice := strings.Split(runtime.FuncForPC(pc).Name(), "/")
+		src = slice[len(slice)-1]
+		slice = strings.Split(file, "/")
+		file := slice[len(slice)-1]
+		src = fmt.Sprintf("%s at %s:%d", src, file, lineno)
+	}
+	return src
 }

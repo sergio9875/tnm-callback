@@ -2,7 +2,6 @@ package logger
 
 import (
 	"bytes"
-	"malawi-callback/utils"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"log"
@@ -11,6 +10,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"tnm-malawi/connectors/callback/utils"
 )
 
 func TestRedact(t *testing.T) {

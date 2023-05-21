@@ -17,4 +17,7 @@ coverage.out
 
 # Serverless build
 .serverless/
-malawi-callback
+
+# Go build artifacts
+callback
+tnm-malawi-callback

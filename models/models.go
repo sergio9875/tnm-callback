@@ -2,8 +2,8 @@ package models
 
 import (
 	"encoding/json"
-	log "malawi-callback/logger"
 	"time"
+	log "tnm-malawi/connectors/callback/logger"
 )
 
 type IncomingRequest struct {

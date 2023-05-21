@@ -1,6 +1,6 @@
 package repository
 
-import "malawi-callback/models"
+import "tnm-malawi/connectors/callback/models"
 
 // Repository represent the repositories
 type Repository interface {

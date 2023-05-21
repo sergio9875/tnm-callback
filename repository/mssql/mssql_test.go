@@ -6,7 +6,7 @@ package mssql
 //  "fmt"
 //  "github.com/DATA-DOG/go-sqlmock"
 //  "github.com/stretchr/testify/assert"
-//  "log"
+//  log "tnm-malawi/connectors/callback/logger"
 //  "testing"
 //)
 //

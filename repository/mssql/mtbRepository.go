@@ -3,8 +3,8 @@ package mssql
 import (
 	"context"
 	"database/sql"
-	"malawi-callback/models"
 	"time"
+	"tnm-malawi/connectors/callback/models"
 )
 
 const (

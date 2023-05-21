@@ -7,11 +7,7 @@ deploy:prod:
   variables:
     ENVIRONMENT: prod
     AWS_PROFILE: onz
-  environment:
-    name: production
   only:
     - main
-
-list prod deploys:
-  variables:
-    AWS_PROFILE: onz
+  dependencies:
+    - build

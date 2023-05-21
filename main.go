@@ -2,42 +2,55 @@ package main
 
 import (
 	"context"
-	"errors"
 	"github.com/google/uuid"
-	"log"
-	"malawi-callback/process"
-	"malawi-callback/utils"
 	"os"
+	log "tnm-malawi/connectors/callback/logger"
+	"tnm-malawi/connectors/callback/process"
+	"tnm-malawi/connectors/callback/utils"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
 var (
-	ErrNameNotProvided = errors.New("no name was provided in the HTTP body")
+	invokeCount = 0
+	controller  *process.Controller
 )
 
-func LambdaHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var controller *process.Controller
-	var err error
-	// stdout and stderr are sent to AWS CloudWatch Logs
-	log.Printf("Processing Lambda request %s\n", request.RequestContext.RequestID)
+const DefaultInvokeCount = 15
 
-	// If no name is provided in the HTTP request body, throw an error
-	if len(request.Body) < 1 {
-		return events.APIGatewayProxyResponse{}, ErrNameNotProvided
-	}
+func Init() {
 	controller = process.NewController(os.Getenv("SECRET_NAME"))
+	invokeCount = 0
+}
 
-	controller.PreProcess(utils.StringPtr(uuid.New().String()))
-	err = controller.Process(ctx, request)
+func init() {
+	// used to init anything special
+}
+
+func LambdaHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	log.Debug("ROOT", "version: <GIT_HASH>")
+	if invokeCount == 0 {
+		Init()
+	}
+
+	invokeCount = invokeCount + 1
+	if invokeCount > *utils.SafeAtoi(utils.Getenv("MAX_INVOKE", "15"), utils.IntPtr(DefaultInvokeCount)) {
+		// reset global variables to nil
+		controller.ShutDown()
+		Init()
+		invokeCount = 1
+	}
+
+	requestId := uuid.New().String()
+	controller.PreProcess(utils.StringPtr(requestId))
+	res, err := controller.Process(ctx, event)
 	if err != nil {
-		log.Fatalf("Lambda process failed %s", err.Error())
-		return events.APIGatewayProxyResponse{}, nil
+		controller.PostProcess()
+		return res, err
 	}
 	controller.PostProcess()
-
-	return events.APIGatewayProxyResponse{}, nil
+	return res, nil
 }
 
 func main() {

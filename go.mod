@@ -1,11 +1,10 @@
-module malawi-callback
+module tnm-malawi/connectors/callback
 
-go 1.18
+go 1.20
 
 require (
 	bou.ke/monkey v1.0.2
 	github.com/alicebob/miniredis v2.5.0+incompatible
-	github.com/aws-samples/lambda-go-samples v0.0.0-20180209124145-2ecfbc4d4d16
 	github.com/aws/aws-lambda-go v1.22.0
 	github.com/aws/aws-sdk-go-v2 v1.16.10
 	github.com/aws/aws-sdk-go-v2/config v1.16.0

@@ -2,9 +2,9 @@ package process
 
 import (
 	"context"
-	log "malawi-callback/logger"
-	"malawi-callback/repository/mssql"
-	"malawi-callback/request"
+	log "tnm-malawi/connectors/callback/logger"
+	"tnm-malawi/connectors/callback/repository/mssql"
+	"tnm-malawi/connectors/callback/request"
 )
 
 func (c *Controller) initRepository() {

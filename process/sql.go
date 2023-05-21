@@ -1,8 +1,8 @@
 package process
 
 import (
-	log "malawi-callback/logger"
-	"malawi-callback/models"
+	log "tnm-malawi/connectors/callback/logger"
+	"tnm-malawi/connectors/callback/models"
 )
 
 func (c *Controller) getMbtPerId(mbtId string) (*models.MbtEntity, error) {

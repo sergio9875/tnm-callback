@@ -1,8 +1,10 @@
-service: malawi-callback
+service: tnm-malawi-callback
 frameworkVersion: ^3.3.0
+configValidationMode: error
 
 custom:
   functionName: ${self:service}
+  functionHandler: callback
   mainSecretName: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):environment_variables.secret_name}
 
 provider:
@@ -13,11 +15,11 @@ provider:
   deploymentBucket:
     name: com.serverless.${self:provider.region}.${aws:accountId, '427246389222'}.dpo.deploys
     blockPublicAccess: true
-  deploymentPrefix: devops/lambdas
+  deploymentPrefix: dpoafrica/mno/callback
   iam:
     role:
       managedPolicies:
-        - { 'Fn::Join': [':', ['arn:aws:iam:', { Ref: 'AWS::AccountId' }, 'policy/sumo-pusher']] }
+        - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):policy.sumo-pusher}
       statements:
         - Effect: "Allow"
           Action:
@@ -26,37 +28,43 @@ provider:
             - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.main}
             - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.db_africainv}
             - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.dpo_services}
-
-apiGateway:
-  restApiId: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):apigateway.restApiId}
-  restApiRootResourceId: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):apigateway.restApiRootResourceId}
-  description: Allow Tnm Malawi to send us callback calls
+  apiGateway:
+    restApiId: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):apiGateway.restApiId}
+    restApiRootResourceId: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):apiGateway.restApiRootResourceId}
+    description: Allow TNM Malawi to send callback calls
 
 package:
   patterns:
-    - "!.serverless"
     - "!.idea"
+    - "!.serverless"
+    - "!.deploy"
+    - "!cache"
+    - "!enums"
     - "!logger"
     - "!models"
     - "!process"
     - "!repository"
+    - "!request"
     - "!utils"
-    - "!README.md"
+    - "README.md"
     - "!sonar-project.properties"
     - "!ascii.txt"
+    - "!*.go.*"
     - "!go.*"
     - "!*.go"
     - "!appspec.yml"
+    - "!serverless.yml"
+    - "!.gitlab-ci.yml"
     - "!.gitignore"
     - "!docker-compose.yml"
     - "!Dockerfile"
-    - ${self:custom.functionName}
+    - ${self:custom.functionHandler}
 
 functions:
   MainFunction:
-    handler: ${self:custom.functionName}
+    handler: ${self:custom.functionHandler}
     name: ${self:custom.functionName}
-    description: Tnm Malawi callback Lambda
+    description: Mtn Rwanda callback Lambda
     runtime: go1.x
     architecture: x86_64
     memorySize: 128
@@ -64,18 +72,12 @@ functions:
     environment:
       LOG_LEVEL: DEBUG
       SECRET_NAME: ${self:custom.mainSecretName}
+      PGW_URL: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):environment_variables.pgw_url}
     vpc: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):vpc}
     events:
       - http:
           method: any
-          path: malawi/callback/{proxy+}
-          # authorizer:
-          #   name: mmcs-safaricom-authorizer
-          #   arn:
-          #     'Fn::ImportValue': 'mmcs-safaricom-authorizer:lambda-function-arn'
-          #   type: request
-          #   resultTtlInSeconds: 0
-          #   managedExternally: false
+          path: tnm/mw/callback/{proxy+}
 
 resources:
   Description: Built via Pipeline ID ${env:CI_PIPELINE_IID} on ${env:CI_COMMIT_BRANCH} for commit ${env:CI_COMMIT_SHORT_SHA} by ${env:CI_COMMIT_AUTHOR}

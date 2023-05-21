@@ -1,0 +1,13 @@
+include:
+  - project: 'project-templates/ci-configurations'
+    ref: main
+    file: '/serverless.golang.yaml'
+
+deploy:prod:
+  variables:
+    ENVIRONMENT: prod
+    AWS_PROFILE: onz
+  only:
+    - main
+  dependencies:
+    - build

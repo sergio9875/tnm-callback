@@ -2,6 +2,8 @@ secrets:
   main: arn:aws:secretsmanager:eu-west-1:427246389222:secret:configuration/dpo/callback/config-8PRbdm
   db_africainv: arn:aws:secretsmanager:eu-west-1:427246389222:secret:dev/dpo/africainv-kv8Bbz
   dpo_services: arn:aws:secretsmanager:eu-west-1:427246389222:secret:dev/dpo/services-rP8QsX
+  db_process: arn:aws:secretsmanager:eu-west-1:427246389222:secret:configuration/process/database-1si9yj
+  cache_db_process: arn:aws:secretsmanager:eu-west-1:427246389222:secret:configuration/dpo/mno/callback/cache-6h702K
 
 environment_variables:
   secret_name: configuration/dpo/callback/config

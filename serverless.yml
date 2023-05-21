@@ -28,6 +28,8 @@ provider:
             - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.main}
             - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.db_africainv}
             - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.dpo_services}
+            - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.db_process}
+            - ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):secrets.cache_db_process}
   apiGateway:
     restApiId: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):apiGateway.restApiId}
     restApiRootResourceId: ${file(./.deploy/config/${aws:accountId, '427246389222'}.yaml):apiGateway.restApiRootResourceId}

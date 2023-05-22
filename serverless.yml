@@ -66,7 +66,7 @@ functions:
   MainFunction:
     handler: ${self:custom.functionHandler}
     name: ${self:custom.functionName}
-    description: Mtn Rwanda callback Lambda
+    description: Tnm Malawi callback Lambda
     runtime: go1.x
     architecture: x86_64
     memorySize: 128

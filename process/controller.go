@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"os"
+	"strconv"
 	"strings"
 	"tnm-malawi/connectors/callback/enums"
 	log "tnm-malawi/connectors/callback/logger"
@@ -108,10 +109,16 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 	}
 
 	log.Infof(*c.requestId, "successfully retrieved payment gateway response %v", pgwResponse)
+	code, err := strconv.Atoi(pgwResponse.Code)
+
+	if err != nil {
+		fmt.Println("Error during conversion")
+		return nil, nil
+	}
 	res = &events.APIGatewayProxyResponse{
 		Headers:         map[string]string{"Content-Type": "application/json"},
-		Body:            "Success",
-		StatusCode:      200,
+		Body:            enums.PGW_RRESPONSE,
+		StatusCode:      code,
 		IsBase64Encoded: false,
 	}
 	return res, nil

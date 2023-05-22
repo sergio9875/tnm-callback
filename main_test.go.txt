@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"os"
-	log "tnm-malawi/connectors/callback/logger"
 	"testing"
+	log "tnm-malawi/connectors/callback/logger"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -27,11 +27,11 @@ func TestLambdaHandler(t *testing.T) {
             "result_code": "200",
             "result_desc": "Process service request successfully.",
             "transaction_id": "R3T5T9G9",
-            "external_ref":"1348800",
+            "external_ref":"1348822",
             "response_time": "2023-05-17 18:12:55"
         }`,
 	}
-	err := LambdaHandler(context.TODO(), req)
+	err, _ := LambdaHandler(context.TODO(), req)
 	if err != nil {
 		log.Error("ROOT", "Error response", err)
 	} else {

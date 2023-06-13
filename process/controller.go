@@ -152,7 +152,7 @@ func (c *Controller) sendSumoMessages(ctx context.Context, message string, param
 	_, err = c.sumoProducer.SendMsg(ctx, sqsMessage)
 
 	if err != nil {
-		log.Error(*c.requestId, "Error while pushing to sqs producer: ", err.Error())
+		log.Error(*c.requestId, "Error while pushing to Api Gateway: ", err.Error())
 		return
 	}
 

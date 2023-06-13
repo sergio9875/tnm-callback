@@ -27,8 +27,8 @@ func TestLambdaHandler(t *testing.T) {
             "result_code": "200",
             "result_desc": "Process service request successfully.",
             "transaction_id": "R3T5T9G9",
-            "external_ref":"1348822",
-            "response_time": "2023-05-17 18:12:55"
+            "external_ref":"1349060",
+            "result_time": "2023-05-17 18:12:55"
         }`,
 	}
 	err, _ := LambdaHandler(context.TODO(), req)

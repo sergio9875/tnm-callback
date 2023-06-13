@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/google/uuid"
 	"os"
 	log "tnm-malawi/connectors/callback/logger"
@@ -9,7 +10,6 @@ import (
 	"tnm-malawi/connectors/callback/utils"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 var (
@@ -54,5 +54,7 @@ func LambdaHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*e
 }
 
 func main() {
+
 	lambda.Start(LambdaHandler)
+
 }

@@ -12,7 +12,7 @@ type IncomingRequest struct {
 	ResultDesc     string `json:"result_desc,omitempty"`
 	TransactionId  string `json:"transaction_id,omitempty"`
 	ExternalRef    string `json:"external_ref,omitempty"`
-	ResponseTime   string `json:"response_time,omitempty"`
+	ResponseTime   string `json:"result_time,omitempty"`
 }
 
 // SqsDestination model

@@ -2,8 +2,8 @@ package enums
 
 const (
 	PGW_SUCCESS         = "000"
-	PGW_SUCCESS_BODY    = "SUCCESS "
-	PGW_FAILED_BODY     = "FAILED "
+	PGW_SUCCESS_BODY    = "SUCCESS"
+	PGW_FAILED_BODY     = "FAILED"
 	PGW_FAILED          = "999"
 	PGW_STATUS_SUCCESS  = 3
 	PGW_STATUS_FAILED   = 7

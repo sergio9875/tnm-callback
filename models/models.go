@@ -14,6 +14,10 @@ type IncomingRequest struct {
 	ExternalRef    string `json:"external_ref,omitempty"`
 	ResponseTime   string `json:"result_time,omitempty"`
 }
+type Response struct {
+	StatusCode int    `json:"statusCode"`
+	Body       string `json:"body"`
+}
 
 // SqsDestination model
 type SqsDestination struct {

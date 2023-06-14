@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"os"
 	log "tnm-malawi/connectors/callback/logger"
+	"tnm-malawi/connectors/callback/models"
 	"tnm-malawi/connectors/callback/process"
 	"tnm-malawi/connectors/callback/utils"
 
@@ -28,7 +29,7 @@ func init() {
 	// used to init anything special
 }
 
-func LambdaHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+func LambdaHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*models.Response, error) {
 	log.Debug("ROOT", "version: <GIT_HASH>")
 	if invokeCount == 0 {
 		Init()
@@ -45,6 +46,7 @@ func LambdaHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*e
 	requestId := uuid.New().String()
 	controller.PreProcess(utils.StringPtr(requestId))
 	res, err := controller.Process(ctx, event)
+
 	if err != nil {
 		controller.PostProcess()
 		return res, err
@@ -54,7 +56,5 @@ func LambdaHandler(ctx context.Context, event events.APIGatewayProxyRequest) (*e
 }
 
 func main() {
-
 	lambda.Start(LambdaHandler)
-
 }

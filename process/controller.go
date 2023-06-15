@@ -55,7 +55,7 @@ func (c *Controller) PostProcess() {
 	c.requestId = utils.StringPtr("ROOT")
 }
 
-func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxyRequest) (*models.Response, error) {
+func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	c.sendSumoMessages(ctx, "start tnm-malawi get callback process", request)
 
@@ -63,19 +63,24 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 	msgBody := new(models.IncomingRequest)
 	pgwResponse := new(models.PaymentGatewayResponse)
 
-	if err = c.handleGetMessage(request.Body, &msgBody); err != nil {
-		c.sendSumoMessages(ctx, utils.JsonIt(err), nil)
-		return &models.Response{
-			StatusCode: 400,
-			Body:       err.Error(),
-		}, nil
+	err = json.Unmarshal([]byte(request.Body), &msgBody)
+
+	if err != nil {
+		res := events.APIGatewayProxyResponse{
+			Headers:         map[string]string{"Content-Type": "application/json"},
+			Body:            err.Error(),
+			StatusCode:      400,
+			IsBase64Encoded: false,
+		}
+		c.sendSumoMessages(ctx, enums.ERROR_MSG_UNMARSHL, res)
+		log.Fatalf(*c.requestId, enums.ERROR_MSG_UNMARSHL+"%s", err.Error())
 	}
 	url := c.config.DpoPygwUrl
-
 	if strings.Trim(os.Getenv("PGW_URL"), "") != "sm" {
 		url = os.Getenv("PGW_URL")
 	}
-
+	log.Infof(*c.requestId, "message body", msgBody)
+	log.Infof(*c.requestId, "pgw url", url)
 	headers := make(map[string]string, 0)
 
 	var statusCode int
@@ -95,9 +100,11 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 
 	if err := (*c.httpClient).PostWithJsonResponse(url, headers, pgwRequest, pgwResponse); err != nil {
 		c.sendSumoMessages(ctx, utils.JsonIt(err), nil)
-		return &models.Response{
-			StatusCode: 400,
-			Body:       err.Error(),
+		return events.APIGatewayProxyResponse{
+			Headers:         map[string]string{"Content-Type": "application/json"},
+			Body:            err.Error(),
+			StatusCode:      400,
+			IsBase64Encoded: false,
 		}, nil
 
 	}
@@ -105,31 +112,30 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 	log.Infof(*c.requestId, "successfully retrieved payment gateway response %v", pgwResponse)
 
 	code, err := strconv.Atoi(pgwResponse.Code)
-
 	if err != nil {
-		return &models.Response{
-			StatusCode: 420,
-			Body:       "Error during conversion",
-		}, nil
+		fmt.Println("Error during conversion")
+		return events.APIGatewayProxyResponse{Body: "Error during conversion"}, nil
 	}
 
 	if pgwResponse.Code == enums.PGW_FAILED {
-		return &models.Response{
-			StatusCode: code,
-			Body:       enums.PGW_FAILED_BODY,
+		return events.APIGatewayProxyResponse{
+			Headers:         map[string]string{"Content-Type": "application/json"},
+			Body:            enums.PGW_FAILED_BODY,
+			StatusCode:      code,
+			IsBase64Encoded: false,
 		}, nil
 
 	}
 
-	return &models.Response{
-		StatusCode: code,
-		Body:       enums.PGW_SUCCESS_BODY,
+	return events.APIGatewayProxyResponse{
+		Headers:         map[string]string{"Content-Type": "application/json"},
+		Body:            enums.PGW_SUCCESS_BODY,
+		StatusCode:      enums.STATUS_CODE_SUCCESS,
+		IsBase64Encoded: false,
 	}, nil
-
 }
 
 func (c *Controller) sendSumoMessages(ctx context.Context, message string, params interface{}) {
-
 	if params != nil {
 		params = fmt.Sprintf("%+v", params)
 	}
@@ -159,6 +165,4 @@ func (c *Controller) sendSumoMessages(ctx context.Context, message string, param
 		log.Error(*c.requestId, "Error while pushing to Api Gateway: ", err.Error())
 		return
 	}
-
-	log.Info(*c.requestId, "Message Successfully pushed")
 }

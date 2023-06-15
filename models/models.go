@@ -10,7 +10,7 @@ type IncomingRequest struct {
 	ConversationId string `json:"conversation_id,omitempty"`
 	ResultCode     string `json:"result_code,omitempty"`
 	ResultDesc     string `json:"result_desc,omitempty"`
-	TransactionId  string `json:"transaction_id,omitempty"`
+	TransactionId  string `json:"transaction_id,"`
 	ExternalRef    string `json:"external_ref,omitempty"`
 	ResponseTime   string `json:"result_time,omitempty"`
 }

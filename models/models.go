@@ -14,10 +14,14 @@ type IncomingRequest struct {
 	ExternalRef    string `json:"external_ref,omitempty"`
 	ResponseTime   string `json:"result_time,omitempty"`
 }
-type Response struct {
-	StatusCode    string `json:"statusCode"`
-	Body          string `json:"body"`
-	TransactionId string `json:"transactionId"`
+type Res struct {
+	StatusCode        int         `json:"StatusCode"`
+	PgwStatusCode     string      `json:"PgwStatusCode"`
+	StatusDescription string      `json:"StatusDescription"`
+	IsBase64Encoded   bool        `json:"IsBase64Encoded"`
+	Headers           interface{} `json:"Headers"`
+	Body              string      `json:"Body"`
+	TransactionId     string      `json:"transactionId"`
 }
 
 // SqsDestination model

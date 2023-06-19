@@ -6,22 +6,28 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/google/uuid"
 	"os"
-	"tnm-malawi/connectors/callback/enums"
 	log "tnm-malawi/connectors/callback/logger"
-	"tnm-malawi/connectors/callback/models"
 	"tnm-malawi/connectors/callback/process"
 	"tnm-malawi/connectors/callback/utils"
 
 	"github.com/aws/aws-lambda-go/events"
 )
 
-var (
-	res        = models.Response{}
-	controller *process.Controller
-	err        error
-)
+var invokeCount = 0
+var controller *process.Controller
 
-func LambdaHandler(ctx context.Context, request events.APIGatewayProxyRequest) (models.Response, error) {
+const DefaultInvokeCount = 15
+
+func Init() {
+	controller = process.NewController(os.Getenv("SECRET_NAME"))
+	invokeCount = 0
+}
+
+func init() {
+	// used to init anything special
+}
+
+func LambdaHandler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	//stdout and stderr are sent to AWS CloudWatch Logs
 	fmt.Printf("Processing request data for request %s.\n", request.RequestContext.RequestID)
 	fmt.Printf("Body size = %d.\n", len(request.Body))
@@ -29,36 +35,28 @@ func LambdaHandler(ctx context.Context, request events.APIGatewayProxyRequest) (
 	fmt.Println("request HTTPMethod:", request.HTTPMethod)
 	fmt.Println("request Headers:", request.Headers)
 
-	if (len(request.Body)) < 1 {
-		fmt.Println("Request.Body was not provided")
-		return models.Response{
-			Body: enums.ERROR_MSG_EMPTY_REQ,
-		}, nil
+	log.Debug("ROOT", "version: <GIT_HASH>")
+	if invokeCount == 0 {
+		Init()
 	}
 
-	controller = process.NewController(os.Getenv("SECRET_NAME"))
+	invokeCount = invokeCount + 1
+	if invokeCount > *utils.SafeAtoi(utils.Getenv("MAX_INVOKE", "15"), utils.IntPtr(DefaultInvokeCount)) {
+		// reset global variables to nil
+		controller.ShutDown()
+		Init()
+		invokeCount = 1
+	}
 
-	controller.PreProcess(utils.StringPtr(uuid.New().String()))
-
-	res, err = controller.Process(ctx, request)
-	log.Println("Processing Lambda request %s\n", res)
-
+	requestId := uuid.New().String()
+	controller.PreProcess(utils.StringPtr(requestId))
+	res, err := controller.Process(ctx, request)
 	if err != nil {
-		log.Fatalf("Lambda process failed %s", err.Error())
-		return models.Response{
-			Body: "Lambda process failed",
-		}, nil
+		controller.PostProcess()
+		return res, err
 	}
 	controller.PostProcess()
-
-	res2 := models.Response{
-		Body:          res.Body,
-		StatusCode:    res.StatusCode,
-		TransactionId: res.TransactionId,
-	}
-	log.Println("Final Result", res2)
-
-	return res2, nil
+	return res, nil
 }
 
 func main() {

@@ -15,8 +15,9 @@ type IncomingRequest struct {
 	ResponseTime   string `json:"result_time,omitempty"`
 }
 type Response struct {
-	StatusCode int    `json:"statusCode"`
-	Body       string `json:"body"`
+	StatusCode    string `json:"statusCode"`
+	Body          string `json:"body"`
+	TransactionId string `json:"transactionId"`
 }
 
 // SqsDestination model

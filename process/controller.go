@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"os"
-	"strconv"
 	"strings"
 	"tnm-malawi/connectors/callback/enums"
 	log "tnm-malawi/connectors/callback/logger"
@@ -57,7 +56,7 @@ func (c *Controller) PostProcess() {
 
 func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 
-	c.sendSumoMessages(ctx, "start tnm-malawi get callback process", request)
+	//c.sendSumoMessages(ctx, "start tnm-malawi get callback process", request)
 
 	var err error
 	msgBody := new(models.IncomingRequest)
@@ -93,7 +92,7 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 
 	pgwRequest := c.mapPaymentGatewayRequest(msgBody, statusCode)
 
-	c.sendSumoMessages(ctx, "payment gateway request", pgwRequest)
+	//c.sendSumoMessages(ctx, "payment gateway request", pgwRequest)
 
 	log.Infof(*c.requestId, "trying to send request to payment gateway",
 		pgwRequest, "to:", url)
@@ -111,26 +110,33 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 	}
 
 	log.Infof(*c.requestId, "successfully retrieved payment gateway response %v", pgwResponse)
+	var resp = models.Res{}
 
 	if pgwResponse.Code == enums.PGW_FAILED {
-		var resp = models.Res{
-			TransactionId: msgBody.TransactionId,
-			Body:          enums.PGW_FAILED_BODY,
-			PgwStatusCode: pgwResponse.Code,
+		resp = models.Res{
+			StatusCode:     200,
+			Headers:        make(map[string]string),
+			TransactionId:  msgBody.TransactionId,
+			PgwDescription: enums.PGW_FAILED_BODY,
+			PgwStatusCode:  pgwResponse.Code,
 		}
-
-		return c.newApiGatewayProxyResponse(&resp), err
 	} else {
-		var resp = models.Res{
-			TransactionId: msgBody.TransactionId,
-			Body:          enums.PGW_SUCCESS_BODY,
-			PgwStatusCode: pgwResponse.Code,
+		resp = models.Res{
+			StatusCode:     200,
+			Headers:        make(map[string]string),
+			TransactionId:  msgBody.TransactionId,
+			PgwDescription: enums.PGW_SUCCESS_BODY,
+			PgwStatusCode:  pgwResponse.Code,
 		}
-
-		return c.newApiGatewayProxyResponse(&resp), err
-
 	}
+	log.Infof(*c.requestId, "RES before %v", &resp)
 
+	return &events.APIGatewayProxyResponse{
+		Headers:         map[string]string{"Content-Type": "application/json"},
+		Body:            utils.JsonIt(&resp),
+		StatusCode:      200,
+		IsBase64Encoded: false,
+	}, nil
 }
 
 func (c *Controller) sendSumoMessages(ctx context.Context, message string, params interface{}) {
@@ -165,23 +171,17 @@ func (c *Controller) sendSumoMessages(ctx context.Context, message string, param
 	}
 }
 
-func (c *Controller) newApiGatewayProxyResponse(response *models.Res) *events.APIGatewayProxyResponse {
-	var resBody = &models.Res{
-		Body:          response.Body,
-		PgwStatusCode: response.PgwStatusCode,
-		TransactionId: response.TransactionId,
-	}
-
-	code, err := strconv.Atoi(resBody.PgwStatusCode)
-	if err != nil {
-		return &events.APIGatewayProxyResponse{Body: "Error Can't convert string into int"}
-
-	}
-
-	return &events.APIGatewayProxyResponse{
-		Headers:         map[string]string{"Content-Type": "application/json"},
-		Body:            utils.JsonIt(resBody),
-		StatusCode:      code,
-		IsBase64Encoded: false,
-	}
-}
+//func (c *Controller) newApiGatewayProxyResponse(response *models.Res) *events.APIGatewayProxyResponse {
+//	var resBody = &models.ResBody{
+//		Description:       response.PgwDescription,
+//		StatusDescription: response.PgwStatusCode,
+//		TransactionId:     response.TransactionId,
+//	}
+//
+//	return &events.APIGatewayProxyResponse{
+//		Headers:         map[string]string{"Content-Type": "application/json"},
+//		Body:            utils.JsonIt(resBody),
+//		StatusCode:      200,
+//		IsBase64Encoded: false,
+//	}
+//}

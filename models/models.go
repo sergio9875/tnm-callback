@@ -16,12 +16,13 @@ type IncomingRequest struct {
 }
 type Res struct {
 	StatusCode        int         `json:"StatusCode"`
-	PgwStatusCode     string      `json:"PgwStatusCode"`
 	StatusDescription string      `json:"StatusDescription"`
 	IsBase64Encoded   bool        `json:"IsBase64Encoded"`
 	Headers           interface{} `json:"Headers"`
 	Body              string      `json:"Body"`
-	TransactionId     string      `json:"transactionId"`
+	PgwStatusCode     string
+	PgwDescription    string
+	TransactionId     string `json:"transaction_id"`
 }
 
 // SqsDestination model

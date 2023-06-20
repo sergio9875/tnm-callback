@@ -13,7 +13,7 @@ func TestLambdaHandler(t *testing.T) {
 	os.Setenv("SECRET_NAME", "configuration/dpo/callback/config")
 	queryStringParameters := map[string]string{}
 	req := events.APIGatewayProxyRequest{
-		Path:       "mtn/rw/callback/",
+		Path:       "tnm/mw/callback/",
 		HTTPMethod: "POST",
 		Headers: map[string]string{
 			"Content-Type": "application/json",
@@ -37,60 +37,3 @@ func TestLambdaHandler(t *testing.T) {
 		log.Info("running")
 	}
 }
-
-//func TestLambdaHandler(t *testing.T) {
-//	os.Setenv("AWS_REGION", "eu-west-1")
-//	os.Setenv("SECRET_NAME", "configuration/dpo/callback/config")
-//	queryStringParameters := map[string]string{}
-//
-//	type args struct {
-//		ctx        context.Context
-//		apiGateway events.APIGatewayProxyRequest
-//	}
-//	tests := []struct {
-//		name    string
-//		args    args
-//		want    bool
-//		wantErr bool
-//	}{
-//		{
-//			name: "Integration Test",
-//			args: args{
-//				ctx: context.TODO(),
-//				apiGateway: events.APIGatewayProxyRequest{
-//					Path:       "https://cb.directpay.online/tnm/mw/callback/request",
-//					HTTPMethod: "POST",
-//					Headers: map[string]string{
-//						"Content-Type": "application/json",
-//					},
-//					IsBase64Encoded:       false,
-//					QueryStringParameters: queryStringParameters,
-//					RequestContext:        events.APIGatewayProxyRequestContext{RequestID: "1"},
-//					Body: `{
-//	       "conversation_id": "AG_20200714_00006368d1caf5faf759",
-//	       "result_code": "300",
-//	       "result_desc": "Process service request successfully.",
-//	       "transaction_id": "R3T5T9G9",
-//	       "external_ref":"1349104",
-//	       "result_time": "2023-06-15 13:50:55"
-//	                        }`},
-//			},
-//			want:    true,
-//			wantErr: false,
-//		},
-//	}
-//
-//	for _, tt := range tests {
-//		if os.Getenv("SKIP_MAIN") == "" {
-//			t.Run(tt.name, func(t *testing.T) {
-//				_, _ = LambdaHandler(tt.args.ctx, tt.args.apiGateway)
-//				var err error
-//				if (err != nil) != tt.wantErr {
-//					t.Errorf("LambdaHandler() error = %v, wantErr %v", err, tt.wantErr)
-//					return
-//				}
-//			})
-//		}
-//	}
-//
-//}

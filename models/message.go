@@ -3,6 +3,11 @@ package models
 type RedisMessage struct {
 	RedisKey string `json:"redisKey"`
 }
+type ResBody struct {
+	StatusDescription string
+	Description       string
+	TransactionId     string
+}
 
 type SqsMessage struct {
 	ReferenceId      string `json:"referenceId"`

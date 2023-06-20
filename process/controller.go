@@ -56,7 +56,7 @@ func (c *Controller) PostProcess() {
 
 func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 
-	//c.sendSumoMessages(ctx, "start tnm-malawi get callback process", request)
+	c.sendSumoMessages(ctx, "start tnm-malawi get callback process", request)
 
 	var err error
 	msgBody := new(models.IncomingRequest)
@@ -92,7 +92,7 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 
 	pgwRequest := c.mapPaymentGatewayRequest(msgBody, statusCode)
 
-	//c.sendSumoMessages(ctx, "payment gateway request", pgwRequest)
+	c.sendSumoMessages(ctx, "payment gateway request", pgwRequest)
 
 	log.Infof(*c.requestId, "trying to send request to payment gateway",
 		pgwRequest, "to:", url)
@@ -170,18 +170,3 @@ func (c *Controller) sendSumoMessages(ctx context.Context, message string, param
 		return
 	}
 }
-
-//func (c *Controller) newApiGatewayProxyResponse(response *models.Res) *events.APIGatewayProxyResponse {
-//	var resBody = &models.ResBody{
-//		Description:       response.PgwDescription,
-//		StatusDescription: response.PgwStatusCode,
-//		TransactionId:     response.TransactionId,
-//	}
-//
-//	return &events.APIGatewayProxyResponse{
-//		Headers:         map[string]string{"Content-Type": "application/json"},
-//		Body:            utils.JsonIt(resBody),
-//		StatusCode:      200,
-//		IsBase64Encoded: false,
-//	}
-//}

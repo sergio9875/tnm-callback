@@ -25,9 +25,9 @@ func TestLambdaHandler(t *testing.T) {
 	       "conversation_id": "AG_20200714_00006368d1caf5faf759",
 	       "result_code": "200",
 	       "result_desc": "Process service request successfully.",
-	       "transaction_id": "R3T5T9G9",
-	       "external_ref":"1349104",
-	       "result_time": "2023-06-15 13:50:55"
+	       "transaction_id": "R7YU5TN7",
+	       "external_ref":"1349193",
+	       "result_time": "2023-06-25 14:18:47"
 	                        }`,
 	}
 	err, _ := LambdaHandler(context.TODO(), req)

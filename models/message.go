@@ -3,10 +3,13 @@ package models
 type RedisMessage struct {
 	RedisKey string `json:"redisKey"`
 }
-type ResBody struct {
-	StatusDescription string
-	Description       string
-	TransactionId     string
+
+type ResponseMalawi struct {
+	ResponseCode        string `json:"result_code"`
+	ResponseDescription string `json:"result_desc"`
+	ConversationId      string `json:"conversation_id"`
+	ResponseTime        string `json:"result_time"`
+	ExternalRef         string `json:"external_ref"`
 }
 
 type SqsMessage struct {

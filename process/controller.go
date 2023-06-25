@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"net/http"
+	"os"
+	"strings"
 	"tnm-malawi/connectors/callback/enums"
 	log "tnm-malawi/connectors/callback/logger"
 	"tnm-malawi/connectors/callback/models"
@@ -73,11 +75,10 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 		log.Fatalf(*c.requestId, enums.ERROR_MSG_UNMARSHL+"%s", err.Error())
 	}
 
-	url := "http://sergeyk-3g.dev.directpay.online/PaymentGateway/paymentGateway.php"
-	//url := c.config.DpoPygwUrl
-	//if strings.Trim(os.Getenv("PGW_URL"), "") != "sm" {
-	//	url = os.Getenv("PGW_URL")
-	//}
+	url := c.config.DpoPygwUrl
+	if strings.Trim(os.Getenv("PGW_URL"), "") != "sm" {
+		url = os.Getenv("PGW_URL")
+	}
 	log.Infof(*c.requestId, "message body", msgBody)
 	log.Infof(*c.requestId, "pgw url", url)
 

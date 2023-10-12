@@ -8,8 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"net/http"
-	"os"
-	"strings"
 	"tnm-malawi/connectors/callback/enums"
 	log "tnm-malawi/connectors/callback/logger"
 	"tnm-malawi/connectors/callback/models"
@@ -56,7 +54,6 @@ func (c *Controller) PostProcess() {
 }
 
 func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-
 	c.sendSumoMessages(ctx, "start tnm-malawi get callback process", request)
 
 	var err error
@@ -75,15 +72,16 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 		log.Fatalf(*c.requestId, enums.ERROR_MSG_UNMARSHL+"%s", err.Error())
 	}
 
-	url := c.config.DpoPygwUrl
-	if strings.Trim(os.Getenv("PGW_URL"), "") != "sm" {
-		url = os.Getenv("PGW_URL")
-	}
+	//url := c.config.DpoPygwUrl
+	url := "http://sergeyk-3g.dev.directpay.online/PaymentGateway/paymentGateway.php"
+	//if strings.Trim(os.Getenv("PGW_URL"), "") != "sm" {
+	//	url = os.Getenv("PGW_URL")
+	//}
 	log.Infof(*c.requestId, "message body", msgBody)
 	log.Infof(*c.requestId, "pgw url", url)
 
 	var statusCode int
-	if msgBody.ResultCode == enums.RESULT_CODE_SUCCESS {
+	if msgBody.ResultDescription == enums.PAID_MESSAGE_SUCCESS && msgBody.Success == enums.PAID_STATUS {
 		statusCode = enums.PGW_STATUS_SUCCESS
 	} else {
 		statusCode = enums.PGW_STATUS_FAILED
@@ -92,7 +90,7 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 	log.Infof(*c.requestId, "Status code assigned:", statusCode)
 
 	pgwRequest := c.mapPaymentGatewayRequest(msgBody, statusCode)
-
+	log.Info("Payment Request", pgwRequest)
 	c.sendSumoMessages(ctx, "payment gateway request", pgwRequest)
 
 	log.Infof(*c.requestId, "trying to send request to payment gateway",
@@ -115,24 +113,26 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 
 	if pgwResponse.Code == enums.PGW_FAILED {
 		resp = models.Res{
-			StatusCode:        msgBody.ResultCode,
-			StatusDescription: msgBody.ResultDesc,
+			StatusCode:        msgBody.ReceiptCode,
+			StatusDescription: msgBody.ResultDescription,
 			Headers:           map[string]string{"Content-Type": "application/json"},
-			ExternalRef:       msgBody.ExternalRef,
+			ExternalRef:       msgBody.ReceiptNumber,
 			PgwDescription:    enums.PGW_FAILED_BODY,
 			PgwStatusCode:     pgwResponse.Code,
+			TransId:           msgBody.TransactionId,
 		}
 	} else {
 		resp = models.Res{
-			StatusCode:        msgBody.ResultCode,
-			StatusDescription: msgBody.ResultDesc,
+			StatusCode:        msgBody.ReceiptCode,
+			StatusDescription: msgBody.ResultDescription,
 			Headers:           map[string]string{"Content-Type": "application/json"},
-			ExternalRef:       msgBody.ExternalRef,
+			ExternalRef:       msgBody.ReceiptNumber,
 			PgwDescription:    enums.PGW_SUCCESS_BODY,
 			PgwStatusCode:     pgwResponse.Code,
+			TransId:           msgBody.TransactionId,
 		}
 	}
-
+	log.Infof(*c.requestId, "final response %v", resp)
 	return &events.APIGatewayProxyResponse{
 		Headers:         map[string]string{"Content-Type": "application/json"},
 		Body:            utils.JsonIt(&resp),

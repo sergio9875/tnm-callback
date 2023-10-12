@@ -2,26 +2,19 @@ package models
 
 type PaymentGatewayRequest struct {
 	Paymentmethod  string         `json:"paymentmethod"`
-	Transunq       interface{}    `json:"transunq"`
 	Paymenttype    string         `json:"paymenttype"`
 	Paymentdetails PaymentDetails `json:"paymentdetails"`
 }
 
 type PaymentDetails struct {
-	Code              int           `json:"code"`
-	StatusCode        string        `json:"statuscode"`
-	Explanation       string        `json:"explanation"`
-	Paymentreference  string        `json:"paymentreference"`
-	Sequenceid        string        `json:"sequenceid"`
-	Terminalmno       string        `json:"terminalmno"`
-	Terminalsettings  []interface{} `json:"terminalsettings"`
-	Amount            string        `json:"amount"`
-	Currency          string        `json:"currency"`
-	Msisdn            string        `json:"msisdn"`
-	Approvalreference string        `json:"approvalreference"`
-	Timestamp         string        `json:"timestamp"`
-	Customerdetails   []interface{} `json:"customerdetails"`
-	Mbtid             string        `json:"mbtid"`
+	Code              int    `json:"code"`
+	Explanation       string `json:"explanation"`
+	Success           bool   `json:"success"`
+	Sequenceid        string `json:"sequenceid"`
+	Terminalmno       string `json:"terminalmno"`
+	Approvalreference string `json:"approvalreference"`
+	Paymentreference  string `json:"paymentreference,omitempty"`
+	Timestamp         string `json:"timestamp"`
 }
 
 type PaymentGatewayResponse struct {

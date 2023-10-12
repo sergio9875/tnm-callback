@@ -22,13 +22,13 @@ func TestLambdaHandler(t *testing.T) {
 		QueryStringParameters: queryStringParameters,
 		RequestContext:        events.APIGatewayProxyRequestContext{RequestID: "1"},
 		Body: `{
-	       "conversation_id": "AG_20200714_00006368d1caf5faf759",
-	       "result_code": "200",
-	       "result_desc": "Process service request successfully.",
-	       "transaction_id": "R7YU5TN7",
-	       "external_ref":"1349193",
-	       "result_time": "2023-06-25 14:18:47"
-	                        }`,
+		"receipt_number": "AJ140B605W",
+		"result_description": "Process service request successfully.",
+		"result_code": "0",
+		"result_time": "2023-10-12 13:55:59",
+		"transaction_id": "1350630",
+		"success": true
+		}`,
 	}
 	err, _ := LambdaHandler(context.TODO(), req)
 	if err != nil {

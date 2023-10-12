@@ -7,12 +7,12 @@ import (
 )
 
 type IncomingRequest struct {
-	ConversationId string `json:"conversation_id,omitempty"`
-	ResultCode     string `json:"result_code,omitempty"`
-	ResultDesc     string `json:"result_desc,omitempty"`
-	TransactionId  string `json:"transaction_id,"`
-	ExternalRef    string `json:"external_ref,omitempty"`
-	ResponseTime   string `json:"result_time,omitempty"`
+	ReceiptNumber     string `json:"receipt_number,omitempty"`
+	ReceiptCode       string `json:"receipt_code,omitempty"`
+	ResultDescription string `json:"result_description,omitempty"`
+	ResultTime        string `json:"result_time,omitempty"`
+	TransactionId     string `json:"transaction_id,"`
+	Success           bool   `json:"success,omitempty"`
 }
 type Res struct {
 	StatusCode        string      `json:"StatusCode"`
@@ -22,6 +22,7 @@ type Res struct {
 	PgwStatusCode     string      `json:"PgwStatusCode"`
 	PgwDescription    string      `json:"PgwDescription"`
 	ExternalRef       string      `json:"ExternalRef"`
+	TransId           string      `json:"transaction_id"`
 }
 
 // SqsDestination model

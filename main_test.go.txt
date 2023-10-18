@@ -22,11 +22,11 @@ func TestLambdaHandler(t *testing.T) {
 		QueryStringParameters: queryStringParameters,
 		RequestContext:        events.APIGatewayProxyRequestContext{RequestID: "1"},
 		Body: `{
-		"receipt_number": "AJ140B605W",
+		"receipt_number": "AJ950B60NF",
 		"result_description": "Process service request successfully.",
 		"result_code": "0",
-		"result_time": "2023-10-12 13:55:59",
-		"transaction_id": "1350630",
+		"result_time": "2023-10-09 09:31:59",
+		"transaction_id": "1350604",
 		"success": true
 		}`,
 	}

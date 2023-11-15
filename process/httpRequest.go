@@ -12,13 +12,13 @@ func (c *Controller) mapPaymentGatewayRequest(msgBody *models.IncomingRequest, s
 		Paymentreference:  msgBody.ReceiptNumber,
 		Sequenceid:        msgBody.TransactionId,
 		Success:           msgBody.Success,
-		Terminalmno:       "TnmMalawiPayment",
+		Terminalmno:       "TnmMalawiRequestPayment",
 		Approvalreference: msgBody.ReceiptNumber,
 		Timestamp:         msgBody.ResultTime,
 	}
 	return &models.PaymentGatewayRequest{
 		Paymentmethod:  "mobile",
-		Paymenttype:    "Process",
+		Paymenttype:    "process",
 		Paymentdetails: paymentDetails,
 	}
 

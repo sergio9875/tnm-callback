@@ -3,6 +3,11 @@ include:
     ref: main
     file: '/serverless.golang.yaml'
 
+deploy:dev:
+
+  only:
+    - malawi-callback
+
 deploy:prod:
   variables:
     ENVIRONMENT: prod

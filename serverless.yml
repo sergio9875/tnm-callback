@@ -70,7 +70,7 @@ functions:
     runtime: go1.x
     architecture: x86_64
     memorySize: 128
-    timeout: 15
+    timeout: 120
     environment:
       LOG_LEVEL: DEBUG
       SECRET_NAME: ${self:custom.mainSecretName}

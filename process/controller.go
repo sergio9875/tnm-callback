@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"tnm-malawi/connectors/callback/enums"
 	log "tnm-malawi/connectors/callback/logger"
@@ -82,7 +83,7 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 	log.Infof(*c.requestId, "pgw url", url)
 
 	var statusCode int
-	if msgBody.ResultDescription == enums.PAID_MESSAGE_SUCCESS && msgBody.Success == enums.PAID_STATUS {
+	if msgBody.Success == enums.PAID_STATUS {
 		statusCode = enums.PGW_STATUS_SUCCESS
 	} else {
 		statusCode = enums.PGW_STATUS_FAILED
@@ -114,7 +115,7 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 
 	if pgwResponse.Code == enums.PGW_FAILED {
 		resp = models.Res{
-			StatusCode:        resp.StatusCode,
+			StatusCode:        strconv.Itoa(http.StatusForbidden),
 			StatusDescription: msgBody.ResultDescription,
 			Headers:           map[string]string{"Content-Type": "application/json"},
 			ExternalRef:       msgBody.ReceiptNumber,
@@ -124,7 +125,7 @@ func (c *Controller) Process(ctx context.Context, request events.APIGatewayProxy
 		}
 	} else {
 		resp = models.Res{
-			StatusCode:        resp.StatusCode,
+			StatusCode:        strconv.Itoa(http.StatusOK),
 			StatusDescription: msgBody.ResultDescription,
 			Headers:           map[string]string{"Content-Type": "application/json"},
 			ExternalRef:       msgBody.ReceiptNumber,
